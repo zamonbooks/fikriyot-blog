@@ -41,7 +41,6 @@ async function setupWebhook() {
 
     // Webhook o'rnatish
     await bot.telegram.setWebhook(webhookUrl, {
-      secret_token: BOT_TOKEN, // Security uchun
       allowed_updates: ['channel_post', 'edited_channel_post'],
     });
 
