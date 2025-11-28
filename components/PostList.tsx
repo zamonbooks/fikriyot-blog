@@ -18,7 +18,6 @@ export default function PostList() {
   const PAGE_SIZE = 10;
 
   useEffect(() => {
-    // Firestore'dan dastlabki postlarni real-time o'qish
     const postsRef = collection(db, 'posts');
     const q = query(
       postsRef,
@@ -49,7 +48,6 @@ export default function PostList() {
     return () => unsubscribe();
   }, []);
 
-  // Intersection Observer for lazy loading
   useEffect(() => {
     if (!loadMoreRef.current || !hasMore || loadingMore) return;
 
@@ -99,11 +97,11 @@ export default function PostList() {
 
   if (loading) {
     return (
-      <div className="space-y-6">
+      <div className="space-y-8">
         {[1, 2, 3].map((i) => (
-          <div key={i} className="bg-white rounded-lg shadow-sm p-6 animate-pulse">
-            <div className="h-4 bg-gray-200 rounded w-1/4 mb-4"></div>
-            <div className="h-32 bg-gray-200 rounded"></div>
+          <div key={i} className="bg-white border-2 border-black rounded-none p-8 animate-pulse">
+            <div className="h-4 bg-gray-200 rounded w-1/4 mb-6"></div>
+            <div className="h-40 bg-gray-200 rounded"></div>
           </div>
         ))}
       </div>
@@ -112,71 +110,67 @@ export default function PostList() {
 
   if (error) {
     return (
-      <div className="bg-red-50 border border-red-200 rounded-lg p-6 text-center">
-        <p className="text-red-800">{error}</p>
+      <div className="bg-red-50 border-2 border-red-600 rounded-none p-8 text-center">
+        <p className="text-red-800 font-medium">{error}</p>
       </div>
     );
   }
 
   if (posts.length === 0) {
     return (
-      <div className="bg-white rounded-lg shadow-sm p-12 text-center">
-        <p className="text-gray-600 text-lg">Hozircha postlar yo'q</p>
-        <p className="text-gray-500 mt-2">Yangi postlar tez orada qo'shiladi</p>
+      <div className="bg-white border-2 border-black rounded-none p-16 text-center">
+        <p className="text-gray-800 text-xl font-medium">Hozircha postlar yo'q</p>
+        <p className="text-gray-600 mt-3">Yangi postlar tez orada qo'shiladi</p>
       </div>
     );
   }
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-8">
       {posts.map((post) => (
-        <div key={post.id} className="bg-white rounded-lg shadow-sm overflow-hidden">
-          <div className="p-4 border-b border-gray-100">
+        <article key={post.id} className="bg-white border-2 border-black rounded-none overflow-hidden hover:shadow-lg transition-shadow">
+          <div className="p-6 bg-gray-50 border-b-2 border-black">
             <div className="flex items-center justify-between">
-              <div className="flex items-center space-x-2 text-sm text-gray-600">
-                <span>📅</span>
-                <time dateTime={post.date}>
-                  {new Date(post.date).toLocaleDateString('uz-UZ', {
-                    year: 'numeric',
-                    month: 'long',
-                    day: 'numeric',
-                    hour: '2-digit',
-                    minute: '2-digit',
-                  })}
-                </time>
-              </div>
+              <time dateTime={post.date} className="text-sm font-medium text-gray-700">
+                {new Date(post.date).toLocaleDateString('uz-UZ', {
+                  year: 'numeric',
+                  month: 'long',
+                  day: 'numeric',
+                  hour: '2-digit',
+                  minute: '2-digit',
+                })}
+              </time>
               <a
                 href={`https://t.me/${post.channelUsername}/${post.postId}`}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="text-blue-600 hover:text-blue-800 text-sm font-medium"
+                className="text-black hover:text-gray-600 text-sm font-bold transition-colors"
               >
                 Telegramda ko'rish →
               </a>
             </div>
           </div>
           
-          <div className="p-4">
+          <div className="p-6">
             <TelegramWidget
               channelUsername={post.channelUsername}
               postId={post.postId}
             />
           </div>
-        </div>
+        </article>
       ))}
 
-      {/* Lazy loading trigger */}
       {hasMore && (
-        <div ref={loadMoreRef} className="py-8 text-center">
+        <div ref={loadMoreRef} className="py-12 text-center">
           {loadingMore ? (
             <div className="flex items-center justify-center">
-              <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
-              <span className="ml-3 text-gray-600">Yuklanmoqda...</span>
+              <div className="animate-spin rounded-full h-10 w-10 border-b-4 border-black"></div>
+              <span className="ml-4 text-gray-700 font-medium">Yuklanmoqda...</span>
             </div>
           ) : (
             <button
               onClick={loadMorePosts}
-              className="bg-blue-600 text-white px-6 py-3 rounded-lg hover:bg-blue-700 transition-colors"
+              className="bg-black text-white px-8 py-4 rounded-none hover:bg-gray-800 transition-colors font-bold text-sm uppercase tracking-wider"
             >
               Ko'proq yuklash
             </button>
@@ -185,7 +179,7 @@ export default function PostList() {
       )}
 
       {!hasMore && posts.length > 0 && (
-        <div className="py-8 text-center text-gray-500">
+        <div className="py-12 text-center text-gray-600 font-medium">
           Barcha postlar yuklandi
         </div>
       )}

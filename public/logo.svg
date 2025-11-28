@@ -1,0 +1,14 @@
+<svg width="300" height="300" viewBox="0 0 300 300" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <style>
+      @font-face {
+        font-family: 'Yataghan';
+        src: url('/fonts/Yataghan-Regular.otf') format('opentype');
+        font-weight: normal;
+        font-style: normal;
+      }
+    </style>
+  </defs>
+  <circle cx="150" cy="150" r="140" fill="black" stroke="black" stroke-width="4"/>
+  <text x="150" y="150" font-family="'Yataghan', serif" font-size="38" font-weight="normal" fill="white" text-anchor="middle" dominant-baseline="middle" letter-spacing="4">FIKRIYOT</text>
+</svg>

@@ -13,29 +13,31 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="uz">
-      <body className="min-h-screen bg-gray-50 antialiased">
-        <header className="bg-white shadow-sm border-b border-gray-200">
-          <div className="max-w-4xl mx-auto px-4 py-6">
-            <h1 className="text-3xl font-bold text-gray-900">Fikriyot</h1>
-            <p className="text-gray-600 mt-1">Telegram kanalining rasmiy blog sayti</p>
+      <body className="min-h-screen bg-white antialiased">
+        <header className="bg-black border-b-2 border-black">
+          <div className="max-w-5xl mx-auto px-4 py-8">
+            <div className="flex flex-col items-center">
+              <img src="/logo.svg" alt="Fikriyot" className="h-32 w-32 mb-4" />
+              <p className="text-gray-400 text-sm">Telegram kanalining rasmiy blog sayti</p>
+            </div>
           </div>
         </header>
         
-        <main className="max-w-4xl mx-auto px-4 py-8">
+        <main className="max-w-5xl mx-auto px-4 py-12">
           {children}
         </main>
         
-        <footer className="bg-white border-t border-gray-200 mt-16">
-          <div className="max-w-4xl mx-auto px-4 py-6 text-center text-gray-600">
-            <p>© 2024 Fikriyot. Barcha huquqlar himoyalangan.</p>
-            <p className="mt-2">
+        <footer className="bg-black border-t-2 border-black mt-20">
+          <div className="max-w-5xl mx-auto px-4 py-8 text-center">
+            <p className="text-gray-400 text-sm">© 2024 Fikriyot. Barcha huquqlar himoyalangan.</p>
+            <p className="mt-3">
               <a 
-                href="https://t.me/fikriyot" 
+                href="https://t.me/fikriyot_uz" 
                 target="_blank" 
                 rel="noopener noreferrer"
-                className="text-blue-600 hover:text-blue-800"
+                className="text-white hover:text-gray-300 transition-colors text-sm font-medium"
               >
-                Telegram kanalimiz
+                Telegram kanalimiz →
               </a>
             </p>
           </div>
