@@ -59,6 +59,19 @@ export class FirestoreService {
   }
 
   /**
+   * Oddiy getAllPosts (pagination'siz)
+   */
+  async getAllPostsSimple(): Promise<Post[]> {
+    try {
+      const result = await this.getAllPosts(1000); // Katta limit
+      return result.posts;
+    } catch (error) {
+      console.error('Error getting all posts:', error);
+      throw error;
+    }
+  }
+
+  /**
    * Yangi postlarni qo'shish (batch)
    */
   async addPosts(posts: PostInput[]): Promise<string[]> {

@@ -66,20 +66,66 @@ async function syncChannelPosts() {
     console.log('Example post format:');
     console.log(JSON.stringify(examplePost, null, 2));
 
-    // Test: Bitta post qo'shish
-    console.log('\nAdding test post...');
-    const testPost: PostInput = {
-      channelUsername: CHANNEL_USERNAME,
-      postId: Date.now(), // Unique ID
-      date: new Date().toISOString(),
-      timestamp: Math.floor(Date.now() / 1000),
-      text: 'Initial sync test post',
-      hasMedia: false,
-    };
+    // JSON fayldan postlarni Firestore'ga ko'chirish
+    console.log('\nMigrating posts from JSON to Firestore...');
+    
+    try {
+      const fs = require('fs');
+      const jsonPath = path.resolve(__dirname, '../data/posts.json');
+      
+      if (fs.existsSync(jsonPath)) {
+        const jsonData = JSON.parse(fs.readFileSync(jsonPath, 'utf8'));
+        const posts = jsonData.posts || [];
+        
+        console.log(`Found ${posts.length} posts in JSON file`);
+        
+        let addedCount = 0;
+        for (const post of posts) {
+          const postInput: PostInput = {
+            channelUsername: post.channelUsername,
+            postId: post.postId,
+            date: post.date,
+            timestamp: post.timestamp,
+            text: post.text || '',
+            hasMedia: post.hasMedia || false,
+          };
+          
+          if (validatePost(postInput)) {
+            try {
+              await firestoreService.addPost(postInput);
+              addedCount++;
+              console.log(`✓ Added post ${post.postId}`);
+            } catch (error: any) {
+              if (error.message?.includes('already exists')) {
+                console.log(`- Post ${post.postId} already exists, skipping`);
+              } else {
+                console.error(`✗ Error adding post ${post.postId}:`, error.message);
+              }
+            }
+          }
+        }
+        
+        console.log(`\n✓ Migration completed: ${addedCount} posts added`);
+      } else {
+        console.log('No JSON file found, creating test post...');
+        
+        // Test post qo'shish
+        const testPost: PostInput = {
+          channelUsername: CHANNEL_USERNAME,
+          postId: Date.now(), // Unique ID
+          date: new Date().toISOString(),
+          timestamp: Math.floor(Date.now() / 1000),
+          text: 'Initial sync test post',
+          hasMedia: false,
+        };
 
-    if (validatePost(testPost)) {
-      await firestoreService.addPost(testPost);
-      console.log('✓ Test post added successfully');
+        if (validatePost(testPost)) {
+          await firestoreService.addPost(testPost);
+          console.log('✓ Test post added successfully');
+        }
+      }
+    } catch (error) {
+      console.error('Error during migration:', error);
     }
 
     console.log('\n✓ Initial sync completed');

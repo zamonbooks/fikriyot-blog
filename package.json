@@ -10,6 +10,11 @@
     "sync": "tsx scripts/initial-sync.ts",
     "fetch-posts": "tsx scripts/fetch-posts.ts",
     "scrape-posts": "tsx scripts/scrape-posts.ts",
+    "scrape-web": "tsx scripts/scrape-telegram-web.ts",
+    "scrape-all": "tsx scripts/scrape-all-posts.ts",
+    "scrape-smart": "tsx scripts/scrape-smart.ts",
+    "scrape-smart": "tsx scripts/scrape-smart.ts",
+    "add-test-posts": "tsx scripts/add-test-posts.ts",
     "webhook:setup": "tsx scripts/setup-webhook.ts",
     "webhook:delete": "tsx scripts/setup-webhook.ts delete"
   },

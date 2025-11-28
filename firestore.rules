@@ -2,14 +2,14 @@ rules_version = '2';
 
 service cloud.firestore {
   match /databases/{database}/documents {
-    // Posts collection
+    // Posts collection - hamma o'qiy va yoza oladi (development uchun)
     match /posts/{postId} {
-      // Hamma o'qiy oladi
-      allow read: if true;
-      
-      // Faqat authenticated users yoza oladi (webhook uchun)
-      // Hozircha hamma yoza oladi, keyinchalik auth qo'shamiz
-      allow write: if true;
+      allow read, write: if true;
+    }
+    
+    // Boshqa collection'lar uchun default rules
+    match /{document=**} {
+      allow read, write: if true;
     }
   }
 }

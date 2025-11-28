@@ -1,93 +1,85 @@
 'use client';
 
-import { useEffect, useState, useRef } from 'react';
-import { collection, query, orderBy, limit, startAfter, getDocs, onSnapshot, QueryDocumentSnapshot } from 'firebase/firestore';
-import { db } from '@/lib/firebase';
+import { useEffect, useState } from 'react';
 import { Post } from '@/types/post';
-import TelegramWidget from './TelegramWidget';
+import dynamic from 'next/dynamic';
+
+// Dynamic import for TelegramWidget (lazy loading)
+const TelegramWidget = dynamic(() => import('./TelegramWidget'), {
+  loading: () => (
+    <div className="flex items-center justify-center h-48">
+      <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
+    </div>
+  ),
+  ssr: false, // Telegram widget client-side only
+});
+import { jsonService } from '@/lib/json-service';
+import { getFirestoreService } from '@/lib/firestore-service';
 
 export default function PostList() {
   const [posts, setPosts] = useState<Post[]>([]);
   const [loading, setLoading] = useState(true);
-  const [loadingMore, setLoadingMore] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [lastDoc, setLastDoc] = useState<QueryDocumentSnapshot | null>(null);
+  const [useFirestore, setUseFirestore] = useState(false);
+  const [loadingMore, setLoadingMore] = useState(false);
   const [hasMore, setHasMore] = useState(true);
-  const loadMoreRef = useRef<HTMLDivElement>(null);
+  const [lastDoc, setLastDoc] = useState<any>(null);
 
-  const PAGE_SIZE = 10;
-
-  useEffect(() => {
-    const postsRef = collection(db, 'posts');
-    const q = query(
-      postsRef,
-      orderBy('timestamp', 'desc'),
-      limit(PAGE_SIZE)
-    );
-
-    const unsubscribe = onSnapshot(
-      q,
-      (snapshot) => {
-        const postsData: Post[] = snapshot.docs.map(doc => ({
-          id: doc.id,
-          ...doc.data(),
-        } as Post));
-
-        setPosts(postsData);
-        setLastDoc(snapshot.docs[snapshot.docs.length - 1] || null);
-        setHasMore(snapshot.docs.length === PAGE_SIZE);
-        setLoading(false);
-      },
-      (err) => {
-        console.error('Error fetching posts:', err);
-        setError('Postlarni yuklashda xatolik yuz berdi');
-        setLoading(false);
-      }
-    );
-
-    return () => unsubscribe();
-  }, []);
-
-  useEffect(() => {
-    if (!loadMoreRef.current || !hasMore || loadingMore) return;
-
-    const observer = new IntersectionObserver(
-      (entries) => {
-        if (entries[0].isIntersecting) {
-          loadMorePosts();
-        }
-      },
-      { threshold: 0.1 }
-    );
-
-    observer.observe(loadMoreRef.current);
-
-    return () => observer.disconnect();
-  }, [hasMore, loadingMore, lastDoc]);
+  const loadInitialPosts = async () => {
+    try {
+      let initialPosts: Post[] = [];
+      
+      // Hozircha faqat JSON'dan foydalanish (Firestore muammosi tufayli)
+      console.log('Loading posts from JSON...');
+      initialPosts = await jsonService.getAllPosts();
+      setUseFirestore(false);
+      setHasMore(false); // JSON'da pagination yo'q
+      console.log('✓ Posts loaded from JSON');
+      
+      // Firestore'ni keyinroq sinab ko'ramiz
+      // try {
+      //   const firestoreService = getFirestoreService();
+      //   const result = await firestoreService.getAllPosts(10);
+      //   
+      //   if (result.posts.length > 0) {
+      //     initialPosts = result.posts;
+      //     setLastDoc(result.lastDoc);
+      //     setHasMore(result.lastDoc !== null);
+      //     setUseFirestore(true);
+      //     console.log('✓ Posts loaded from Firestore');
+      //   } else {
+      //     throw new Error('No posts in Firestore');
+      //   }
+      // } catch (firestoreError) {
+      //   console.log('Firestore not available, using JSON fallback');
+      //   initialPosts = await jsonService.getAllPosts();
+      //   setUseFirestore(false);
+      //   setHasMore(false);
+      //   console.log('✓ Posts loaded from JSON');
+      // }
+      
+      setPosts(initialPosts);
+      setLoading(false);
+    } catch (err) {
+      console.error('Error fetching posts:', err);
+      setError('Postlarni yuklashda xatolik yuz berdi');
+      setLoading(false);
+    }
+  };
 
   const loadMorePosts = async () => {
-    if (!lastDoc || loadingMore || !hasMore) return;
-
+    if (!useFirestore || !hasMore || loadingMore) return;
+    
     setLoadingMore(true);
-
     try {
-      const postsRef = collection(db, 'posts');
-      const q = query(
-        postsRef,
-        orderBy('timestamp', 'desc'),
-        startAfter(lastDoc),
-        limit(PAGE_SIZE)
-      );
-
-      const snapshot = await getDocs(q);
-      const newPosts: Post[] = snapshot.docs.map(doc => ({
-        id: doc.id,
-        ...doc.data(),
-      } as Post));
-
-      setPosts(prev => [...prev, ...newPosts]);
-      setLastDoc(snapshot.docs[snapshot.docs.length - 1] || null);
-      setHasMore(snapshot.docs.length === PAGE_SIZE);
+      const firestoreService = getFirestoreService();
+      const result = await firestoreService.getAllPosts(10, lastDoc);
+      
+      setPosts(prev => [...prev, ...result.posts]);
+      setLastDoc(result.lastDoc);
+      setHasMore(result.lastDoc !== null);
+      
+      console.log(`✓ Loaded ${result.posts.length} more posts`);
     } catch (err) {
       console.error('Error loading more posts:', err);
     } finally {
@@ -95,13 +87,29 @@ export default function PostList() {
     }
   };
 
+  useEffect(() => {
+    loadInitialPosts();
+  }, []);
+
+
+
   if (loading) {
     return (
       <div className="space-y-8">
         {[1, 2, 3].map((i) => (
-          <div key={i} className="bg-white border-2 border-black rounded-none p-8 animate-pulse">
-            <div className="h-4 bg-gray-200 rounded w-1/4 mb-6"></div>
-            <div className="h-40 bg-gray-200 rounded"></div>
+          <div key={i} className="relative group">
+            <div className="absolute inset-0 bg-white/5 backdrop-blur-xl rounded-2xl border border-white/10 shadow-2xl"></div>
+            <div className="relative p-8 animate-pulse">
+              <div className="flex items-center space-x-4 mb-6">
+                <div className="h-4 bg-white/20 rounded-full w-32"></div>
+                <div className="h-4 bg-white/10 rounded-full w-24"></div>
+              </div>
+              <div className="space-y-3">
+                <div className="h-4 bg-white/10 rounded-full w-full"></div>
+                <div className="h-4 bg-white/10 rounded-full w-3/4"></div>
+                <div className="h-32 bg-white/5 rounded-xl border border-white/10"></div>
+              </div>
+            </div>
           </div>
         ))}
       </div>
@@ -110,77 +118,136 @@ export default function PostList() {
 
   if (error) {
     return (
-      <div className="bg-red-50 border-2 border-red-600 rounded-none p-8 text-center">
-        <p className="text-red-800 font-medium">{error}</p>
+      <div className="relative">
+        <div className="absolute inset-0 bg-red-500/10 backdrop-blur-xl rounded-2xl border border-red-500/20 shadow-2xl"></div>
+        <div className="relative p-8 text-center">
+          <div className="text-red-400 text-4xl mb-4">⚠️</div>
+          <p className="text-red-300 font-medium text-lg">{error}</p>
+          <p className="text-red-400 text-sm mt-2">Sahifani yangilab ko'ring</p>
+        </div>
       </div>
     );
   }
 
   if (posts.length === 0) {
     return (
-      <div className="bg-white border-2 border-black rounded-none p-16 text-center">
-        <p className="text-gray-800 text-xl font-medium">Hozircha postlar yo'q</p>
-        <p className="text-gray-600 mt-3">Yangi postlar tez orada qo'shiladi</p>
+      <div className="relative">
+        <div className="absolute inset-0 bg-white/5 backdrop-blur-xl rounded-2xl border border-white/10 shadow-2xl"></div>
+        <div className="relative p-12 md:p-20 text-center">
+          <div className="text-6xl mb-6 filter drop-shadow-lg">📝</div>
+          <p className="text-white text-xl md:text-2xl font-bold mb-3 drop-shadow-lg">Hozircha postlar yo'q</p>
+          <p className="text-gray-300 text-base md:text-lg mb-6">Yangi fikrlar tez orada qo'shiladi</p>
+          <div className="inline-block relative">
+            <div className="absolute inset-0 bg-white/10 rounded-full blur-lg"></div>
+            <div className="relative bg-white/5 backdrop-blur-md border border-white/20 px-4 py-2 rounded-full">
+              <p className="text-gray-200 text-sm">
+                📊 Ma'lumotlar: {useFirestore ? '🔥 Firestore' : '📄 JSON fayl'}
+              </p>
+            </div>
+          </div>
+        </div>
       </div>
     );
   }
 
   return (
-    <div className="space-y-8">
-      {posts.map((post) => (
-        <article key={post.id} className="bg-white border-2 border-black rounded-none overflow-hidden hover:shadow-lg transition-shadow">
-          <div className="p-6 bg-gray-50 border-b-2 border-black">
-            <div className="flex items-center justify-between">
-              <time dateTime={post.date} className="text-sm font-medium text-gray-700">
-                {new Date(post.date).toLocaleDateString('uz-UZ', {
-                  year: 'numeric',
-                  month: 'long',
-                  day: 'numeric',
-                  hour: '2-digit',
-                  minute: '2-digit',
-                })}
-              </time>
-              <a
-                href={`https://t.me/${post.channelUsername}/${post.postId}`}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="text-black hover:text-gray-600 text-sm font-bold transition-colors"
-              >
-                Telegramda ko'rish →
-              </a>
-            </div>
+    <div className="space-y-8 md:space-y-12">
+      {/* Ma'lumotlar manbai ko'rsatkichi */}
+      <div className="text-center">
+        <div className="inline-block relative">
+          <div className="absolute inset-0 bg-white/10 rounded-full blur-lg"></div>
+          <div className="relative bg-white/5 backdrop-blur-md border border-white/20 px-6 py-3 rounded-full shadow-2xl">
+            <p className="text-sm font-medium text-gray-200">
+              {useFirestore ? '🔥 Real-time ma\'lumotlar' : '📄 Statik ma\'lumotlar'} • {posts.length} ta post
+            </p>
           </div>
+        </div>
+      </div>
+
+      {posts.map((post, index) => (
+        <article 
+          key={post.id} 
+          className="group relative"
+        >
+          {/* Glassmorphism card */}
+          <div className="absolute inset-0 bg-white/5 backdrop-blur-xl rounded-2xl border border-white/10 shadow-2xl group-hover:bg-white/10 group-hover:border-white/20 transition-all duration-300"></div>
+          <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_50%,rgba(255,255,255,0.05),transparent_70%)] rounded-2xl opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
           
-          <div className="p-6">
-            <TelegramWidget
-              channelUsername={post.channelUsername}
-              postId={post.postId}
-            />
+          <div className="relative overflow-hidden rounded-2xl">
+            {/* Header with glassmorphism */}
+            <div className="relative p-6 border-b border-white/10">
+              <div className="absolute inset-0 bg-white/5 backdrop-blur-sm"></div>
+              <div className="relative flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+                <div className="flex items-center space-x-3">
+                  <div className="w-8 h-8 bg-white/20 backdrop-blur-md border border-white/30 rounded-full flex items-center justify-center text-white font-bold text-sm shadow-lg">
+                    {index + 1}
+                  </div>
+                  <time dateTime={post.date} className="text-sm font-medium text-gray-300">
+                    {new Date(post.date).toLocaleDateString('uz-UZ', {
+                      year: 'numeric',
+                      month: 'long',
+                      day: 'numeric',
+                      hour: '2-digit',
+                      minute: '2-digit',
+                    })}
+                  </time>
+                  {post.hasMedia && (
+                    <span className="bg-white/10 backdrop-blur-md border border-white/20 text-gray-200 px-2 py-1 rounded-full text-xs font-medium">
+                      📎 Media
+                    </span>
+                  )}
+                </div>
+                <a
+                  href={`https://t.me/${post.channelUsername}/${post.postId}`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="group/btn relative"
+                >
+                  <div className="absolute inset-0 bg-white/20 rounded-full blur-lg group-hover/btn:bg-white/30 transition-all duration-300"></div>
+                  <div className="relative bg-white/10 backdrop-blur-md border border-white/20 hover:border-white/30 text-white px-4 py-2 rounded-full text-sm font-medium transition-all duration-300 transform hover:scale-105 shadow-lg">
+                    📱 Telegramda ko'rish
+                  </div>
+                </a>
+              </div>
+            </div>
+            
+            {/* Content area */}
+            <div className="relative p-6 md:p-8">
+              <TelegramWidget
+                channelUsername={post.channelUsername}
+                postId={post.postId}
+              />
+            </div>
           </div>
         </article>
       ))}
 
-      {hasMore && (
-        <div ref={loadMoreRef} className="py-12 text-center">
-          {loadingMore ? (
-            <div className="flex items-center justify-center">
-              <div className="animate-spin rounded-full h-10 w-10 border-b-4 border-black"></div>
-              <span className="ml-4 text-gray-700 font-medium">Yuklanmoqda...</span>
+      {/* Load More Button */}
+      {useFirestore && hasMore && (
+        <div className="text-center pt-12">
+          <button
+            onClick={loadMorePosts}
+            disabled={loadingMore}
+            className="group relative"
+          >
+            <div className="absolute inset-0 bg-white/20 rounded-full blur-xl group-hover:bg-white/30 group-disabled:bg-white/10 transition-all duration-300"></div>
+            <div className="relative bg-white/10 backdrop-blur-md border border-white/20 hover:border-white/30 text-white px-8 py-4 rounded-full font-medium transition-all duration-300 transform hover:scale-105 shadow-2xl disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none disabled:border-white/10">
+              {loadingMore ? '⏳ Yuklanmoqda...' : '📚 Ko\'proq fikrlar yuklash'}
             </div>
-          ) : (
-            <button
-              onClick={loadMorePosts}
-              className="bg-black text-white px-8 py-4 rounded-none hover:bg-gray-800 transition-colors font-bold text-sm uppercase tracking-wider"
-            >
-              Ko'proq yuklash
-            </button>
-          )}
+          </button>
         </div>
       )}
 
-      {!hasMore && posts.length > 0 && (
-        <div className="py-12 text-center text-gray-600 font-medium">
-          Barcha postlar yuklandi
+      {/* Loading More Indicator */}
+      {loadingMore && (
+        <div className="text-center py-12">
+          <div className="inline-block relative">
+            <div className="absolute inset-0 bg-white/10 rounded-full blur-lg"></div>
+            <div className="relative bg-white/5 backdrop-blur-md border border-white/20 rounded-full p-4 shadow-2xl">
+              <div className="animate-spin rounded-full h-8 w-8 border-4 border-white/20 border-t-white/60"></div>
+            </div>
+          </div>
+          <p className="text-gray-300 mt-4 font-medium">Yangi fikrlar yuklanmoqda...</p>
         </div>
       )}
     </div>
