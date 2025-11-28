@@ -8,6 +8,7 @@
     "start": "next start",
     "lint": "eslint",
     "sync": "tsx scripts/initial-sync.ts",
+    "fetch-posts": "tsx scripts/fetch-posts.ts",
     "webhook:setup": "tsx scripts/setup-webhook.ts",
     "webhook:delete": "tsx scripts/setup-webhook.ts delete"
   },
