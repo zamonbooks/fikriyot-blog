@@ -9,10 +9,13 @@
     "lint": "eslint",
     "sync": "tsx scripts/initial-sync.ts",
     "fetch-posts": "tsx scripts/fetch-posts.ts",
+    "scrape-posts": "tsx scripts/scrape-posts.ts",
     "webhook:setup": "tsx scripts/setup-webhook.ts",
     "webhook:delete": "tsx scripts/setup-webhook.ts delete"
   },
   "dependencies": {
+    "axios": "^1.13.2",
+    "cheerio": "^1.1.2",
     "firebase": "^12.6.0",
     "firebase-admin": "^13.6.0",
     "next": "16.0.5",
