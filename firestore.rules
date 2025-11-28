@@ -1,0 +1,15 @@
+rules_version = '2';
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+    // Posts collection
+    match /posts/{postId} {
+      // Hamma o'qiy oladi
+      allow read: if true;
+      
+      // Faqat authenticated users yoza oladi (webhook uchun)
+      // Hozircha hamma yoza oladi, keyinchalik auth qo'shamiz
+      allow write: if true;
+    }
+  }
+}
