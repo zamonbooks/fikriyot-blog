@@ -17,6 +17,7 @@
     "generate-favicon": "node scripts/generate-favicon.js",
     "test-fetch": "tsx scripts/test-fetch-post.ts",
     "check-channel": "tsx scripts/check-channel.ts",
+    "fetch-channel-info": "tsx scripts/fetch-channel-info.ts",
     "scrape": "tsx scripts/auto-scraper.ts"
   },
   "dependencies": {

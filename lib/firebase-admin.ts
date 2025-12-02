@@ -1,14 +1,22 @@
 import { initializeApp, getApps, cert, App } from 'firebase-admin/app';
 import { getFirestore } from 'firebase-admin/firestore';
+import * as dotenv from 'dotenv';
+import * as path from 'path';
+
+// Load environment variables
+dotenv.config({ path: path.resolve(process.cwd(), '.env.local') });
 
 let app: App;
 
 if (!getApps().length) {
-  // Firebase Admin SDK uchun service account key kerak
-  // Hozircha client SDK dan foydalanamiz
-  // Keyinchalik production uchun service account qo'shamiz
+  const projectId = process.env.NEXT_PUBLIC_FIREBASE_PROJECT_ID;
+  
+  if (!projectId) {
+    throw new Error('NEXT_PUBLIC_FIREBASE_PROJECT_ID is not set in .env.local');
+  }
+  
   app = initializeApp({
-    projectId: process.env.NEXT_PUBLIC_FIREBASE_PROJECT_ID,
+    projectId: projectId,
   });
 } else {
   app = getApps()[0];

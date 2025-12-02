@@ -2,29 +2,39 @@
 
 import { useEffect, useState } from 'react';
 import { Post } from '@/types/post';
+import { ChannelInfo } from '@/types/channel';
 import { jsonService } from '@/lib/json-service';
+import { channelService } from '@/lib/channel-service';
 import PostCard from './PostCard';
 
 export default function PostList() {
   const [posts, setPosts] = useState<Post[]>([]);
+  const [channelInfo, setChannelInfo] = useState<ChannelInfo | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    const loadPosts = async () => {
+    const loadData = async () => {
       try {
         setLoading(true);
-        const data = await jsonService.getAllPosts();
-        setPosts(data);
+        
+        // Load posts and channel info in parallel
+        const [postsData, channelData] = await Promise.all([
+          jsonService.getAllPosts(),
+          channelService.getChannelInfo(),
+        ]);
+        
+        setPosts(postsData);
+        setChannelInfo(channelData);
       } catch (err) {
-        console.error('Error loading posts:', err);
+        console.error('Error loading data:', err);
         setError('Postlarni yuklashda xatolik yuz berdi');
       } finally {
         setLoading(false);
       }
     };
 
-    loadPosts();
+    loadData();
   }, []);
 
   // Auto-scroll to bottom (latest post) on mount
@@ -83,6 +93,10 @@ export default function PostList() {
 
   // Reverse posts - oldest first (like Telegram)
   const reversedPosts = [...posts].reverse();
+  
+  // Use channel info or defaults
+  const channelTitle = channelInfo?.title || 'Fikriyot';
+  const channelUsername = channelInfo?.username || 'fikriyot_uz';
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100 dark:from-gray-900 dark:to-gray-800">
@@ -96,7 +110,7 @@ export default function PostList() {
               </svg>
               <div>
                 <h1 className="text-xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
-                  Fikriyot
+                  {channelTitle}
                 </h1>
                 <p className="text-xs text-gray-600 dark:text-gray-400">
                   {posts.length} ta post
@@ -104,7 +118,7 @@ export default function PostList() {
               </div>
             </div>
             <a
-              href="https://t.me/fikriyot_uz"
+              href={`https://t.me/${channelUsername}`}
               target="_blank"
               rel="noopener noreferrer"
               className="px-4 py-2 bg-blue-500/10 hover:bg-blue-500/20 backdrop-blur-sm border border-blue-500/20 rounded-full text-blue-600 dark:text-blue-400 text-sm font-medium transition-all duration-200 hover:scale-105"
@@ -133,12 +147,12 @@ export default function PostList() {
         <div className="max-w-4xl mx-auto px-4 py-6 text-center text-gray-600 dark:text-gray-400">
           <p className="text-sm">
             <a
-              href="https://t.me/fikriyot_uz"
+              href={`https://t.me/${channelUsername}`}
               target="_blank"
               rel="noopener noreferrer"
               className="text-blue-600 dark:text-blue-400 hover:underline font-medium"
             >
-              @fikriyot_uz
+              @{channelUsername}
             </a>
             {' '}kanalining rasmiy veb-sayti
           </p>
