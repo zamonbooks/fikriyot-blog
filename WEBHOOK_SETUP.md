@@ -163,18 +163,18 @@ jobs:
 
 ## ✅ Tayyor!
 
-PS E:\fikriyot\fikriyot-blog> npm run fetch-channel-info
-
-> fikriyot-blog@0.1.0 fetch-channel-info
-> tsx scripts/fetch-channel-info.ts
-
-[dotenv@17.2.3] injecting env (15) from .env.local -- tip: ⚙️  suppress all logs with { quiet: true }
-[dotenv@17.2.3] injecting env (0) from .env.local -- tip: ⚙️  override existing env vars with { override:
- true }
+[dotenv@17.2.3] injecting env (15) from .env.local -- tip: 🔐 prevent committing .env to code: https://dotenvx.com/precommit
 📡 Fetching channel info from Telegram...
 
 Channel: @fikriyot_uz
-❌ Error saving to Firebase: Could not load the default credentials. Browse to https://cloud.google.com/do
-cs/authentication/getting-started for more information.
-❌ Error: Could not load the default credentials. Browse to https://cloud.google.com/docs/authentication/g
-etting-started for more information.
+
+✅ Channel info saved to Firebase successfully!
+
+📋 Channel Info:
+   Title: Fikriyot
+   Username: @fikriyot_uz
+   Description: Fikr qilish huquqidan mahrum qilinishga rozi bo'lmang.
+Nodavlat fikrlog.
+   Members: N/A
+
+💾 Saved to: Firestore > channelInfo/info
