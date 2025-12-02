@@ -26,7 +26,7 @@ export default function ChannelHeader() {
   // Use default values while loading
   const title = channelInfo?.title || 'Fikriyot';
   const username = channelInfo?.username || 'fikriyot_uz';
-  const description = channelInfo?.description || 'Nodavlat fikrlog. HAQqa ishqsiz — ishqqa haqsiz!';
+  const description = channelInfo?.description || "Fikr qilish huquqidan mahrum qilinishga rozi bo'lmang. Nodavlat fikrlog.";
 
   return (
     <header className="relative overflow-hidden">

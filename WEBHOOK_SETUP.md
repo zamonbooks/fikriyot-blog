@@ -163,18 +163,5 @@ jobs:
 
 ## ✅ Tayyor!
 
-[dotenv@17.2.3] injecting env (15) from .env.local -- tip: 🔐 prevent committing .env to code: https://dotenvx.com/precommit
-📡 Fetching channel info from Telegram...
-
-Channel: @fikriyot_uz
-
-✅ Channel info saved to Firebase successfully!
-
-📋 Channel Info:
-   Title: Fikriyot
-   Username: @fikriyot_uz
-   Description: Fikr qilish huquqidan mahrum qilinishga rozi bo'lmang.
-Nodavlat fikrlog.
-   Members: N/A
 
 💾 Saved to: Firestore > channelInfo/info
