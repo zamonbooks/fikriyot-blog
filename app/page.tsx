@@ -11,10 +11,10 @@ export default function Home() {
           
           <div className="relative p-8 md:p-12">
             <h2 className="text-3xl md:text-5xl font-bold text-white mb-4 drop-shadow-2xl">
-              So'nggi Fikrlar
+              So'nggi Postlar
             </h2>
             <p className="text-gray-300 text-lg md:text-xl max-w-2xl mx-auto leading-relaxed mb-6">
-              Fikriyot kanalining eng so'nggi postlari va fikrlari
+              Fikriyot kanalidagi eng so'nggi postlari
             </p>
             
             {/* Glassmorphism badge */}

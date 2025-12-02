@@ -52,9 +52,6 @@ export default function ChannelHeader() {
           <h1 className="text-4xl md:text-6xl font-bold text-white mb-4 tracking-tight drop-shadow-2xl">
             {title}
           </h1>
-          <p className="text-gray-300 text-lg md:text-xl mb-3 font-medium">
-            Fikr qilmaysizlarmi?!
-          </p>
           <p className="text-gray-400 text-sm md:text-base max-w-2xl mb-8">
             {description}
           </p>

@@ -4,7 +4,7 @@ import ChannelHeader from "@/components/ChannelHeader";
 import ChannelFooter from "@/components/ChannelFooter";
 
 export const metadata: Metadata = {
-  title: "Fikriyot - Blog",
+  title: "Fikriyot",
   description: "Fikriyot Telegram kanalining rasmiy blog sayti",
   icons: {
     icon: [
