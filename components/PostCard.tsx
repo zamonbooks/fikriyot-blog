@@ -249,12 +249,12 @@ export default function PostCard({ post, priority = false }: PostCardProps) {
                 </div>
                 <div className="flex-1">
                   <p className="text-sm text-gray-600 dark:text-gray-400 mb-1">
-                    {post.media.type === 'sticker' && '🎨 Stiker'}
+                    {(post.media.type as string) === 'sticker' && '🎨 Stiker'}
                     {post.media.type === 'animation' && '🎬 Animatsiya'}
-                    {post.media.type === 'poll' && '📊 So\'rovnoma'}
-                    {post.media.type === 'location' && '📍 Joylashuv'}
-                    {post.media.type === 'contact' && '👤 Kontakt'}
-                    {!['sticker', 'animation', 'poll', 'location', 'contact'].includes(post.media.type) && '📎 Media'}
+                    {(post.media.type as string) === 'poll' && '📊 So\'rovnoma'}
+                    {(post.media.type as string) === 'location' && '📍 Joylashuv'}
+                    {(post.media.type as string) === 'contact' && '👤 Kontakt'}
+                    {!['sticker', 'animation', 'poll', 'location', 'contact', 'photo', 'video', 'audio', 'voice', 'document'].includes(post.media.type) && '📎 Media'}
                   </p>
                   <p className="font-semibold text-gray-900 dark:text-white mb-3">
                     Ushbu media turi saytda ko'rsatilmaydi
