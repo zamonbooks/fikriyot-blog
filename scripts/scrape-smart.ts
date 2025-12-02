@@ -54,8 +54,8 @@ async function scrapeSmartPosts() {
         let checkedCount = 0;
         let duplicateCount = 0;
 
-        // 1 dan 1000 gacha barcha ID'larni tekshirish
-        for (let postId = 1; postId <= 1000; postId++) {
+        // 1 dan 1200 gacha barcha ID'larni tekshirish (yangi postlar uchun)
+        for (let postId = 1; postId <= 1200; postId++) {
             try {
                 checkedCount++;
 
@@ -124,7 +124,7 @@ async function scrapeSmartPosts() {
 
                 // Progress ko'rsatish
                 if (checkedCount % 100 === 0) {
-                    console.log(`📊 Progress: ${checkedCount}/1000 checked, ${foundCount} posts found`);
+                    console.log(`📊 Progress: ${checkedCount}/1200 checked, ${foundCount} posts found`);
                 }
 
                 // Rate limiting
@@ -248,7 +248,7 @@ async function scrapeSmartPosts() {
             lastSync: new Date().toISOString(),
             totalFound: uniquePosts.length,
             duplicatesRemoved: duplicateCount,
-            scrapingRange: '1-1000',
+            scrapingRange: '1-1200',
         };
 
         const jsonPath = path.resolve(__dirname, '../data/posts.json');

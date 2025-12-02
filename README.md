@@ -1,158 +1,223 @@
-# Fikriyot Blog
+# Fikriyot Telegram Blog
 
-Telegram kanalining postlarini veb-saytda ko'rsatuvchi blog platformasi. Tizim Telegram kanalidan barcha mavjud postlarni oladi va yangi postlar chiqishi bilan avtomatik ravishda saytni yangilaydi.
+Professional blog platformasi - Telegram kanalining postlarini veb-saytda ko'rsatish uchun.
 
-## Xususiyatlar
+## Features
 
-- 📱 **Responsive dizayn** - Barcha qurilmalarda yaxshi ishlaydi
-- 🔄 **Real-time sync** - Telegram webhook orqali avtomatik yangilanish
-- ⚡ **Tez yuklash** - Next.js SSG va optimizatsiya
-- 🎨 **Telegram Widget** - Postlarning to'liq formatini saqlaydi
-- 📊 **Dual storage** - Firestore va JSON fallback
-- 🔍 **API endpoints** - RESTful API
+✅ **Custom Post Rendering** - Telegram Widget o'rniga, o'zimizning chiroyli card komponentimiz  
+✅ **Rich Text Formatting** - Bold, italic, links, code blocks, mentions, hashtags  
+✅ **Media Support** - Rasmlar, videolar, dokumentlar  
+✅ **Responsive Design** - Mobil va desktop uchun optimallashtirilgan  
+✅ **SEO Friendly** - Server-side rendering bilan  
+✅ **Performance** - Next.js Image optimization, lazy loading  
 
-## Texnologiyalar
+## Tech Stack
 
-- **Frontend**: Next.js 16, React, TypeScript, Tailwind CSS
-- **Backend**: Netlify Functions, Firebase Firestore
-- **Telegram**: Bot API, Webhook, Widget SDK
-- **Deployment**: Netlify
+- **Frontend**: Next.js 16, React 19, TypeScript, Tailwind CSS
+- **Backend**: Telegram Bot API, Telegraf
+- **Deployment**: Netlify (ready)
+- **Database**: JSON file (simple) yoki Firestore (advanced)
 
-## O'rnatish
+## Setup
 
-1. **Repository'ni clone qiling**
-```bash
-git clone <repository-url>
-cd fikriyot-blog
+### 1. Environment Variables
+
+`.env.local` faylini yarating:
+
+```env
+# Telegram Bot Configuration
+TELEGRAM_BOT_TOKEN=your_bot_token_here
+TELEGRAM_CHANNEL_USERNAME=fikriyot_uz
+
+# Development Settings
+NEXT_PUBLIC_USE_SAMPLE_DATA=false
 ```
 
-2. **Dependencies'larni o'rnating**
+### 2. Install Dependencies
+
 ```bash
 npm install
 ```
 
-3. **Environment variables'ni sozlang**
-`.env.local` faylini yarating:
-```env
-# Firebase Configuration
-NEXT_PUBLIC_FIREBASE_API_KEY=your_api_key
-NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN=your_project.firebaseapp.com
-NEXT_PUBLIC_FIREBASE_PROJECT_ID=your_project_id
-NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET=your_project.appspot.com
-NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID=your_sender_id
-NEXT_PUBLIC_FIREBASE_APP_ID=your_app_id
+### 3. Sync Posts
 
-# Telegram Bot Configuration
-TELEGRAM_BOT_TOKEN=your_bot_token
-TELEGRAM_CHANNEL_USERNAME=your_channel_username
-```
+**Barcha postlarni olish (tavsiya etiladi):**
 
-4. **Firebase'ni sozlang**
 ```bash
-npx firebase login
-npx firebase use your_project_id
-npx firebase deploy --only firestore:rules
+npm run sync
 ```
 
-5. **Development server'ni ishga tushiring**
+Bu script:
+- Telegram Web'dan scraping qiladi (https://t.me/s/channel)
+- **Barcha** postlarni oladi (limitatsiya yo'q)
+- O'chirilgan postlarni avtomatik skip qiladi
+- Text, media URL, views'ni saqlaydi
+- `data/posts.json` fayliga yozadi
+
+**Faqat yangi postlarni olish (tez):**
+
+```bash
+npm run sync:quick
+```
+
+Bu script:
+- Telegram Bot API orqali oxirgi 100 ta postni oladi
+- Text, entities, media'ni to'liq oladi
+- Tezroq ishlaydi, lekin faqat yangi postlar
+
+### 4. Run Development Server
+
 ```bash
 npm run dev
 ```
 
-Loyiha [http://localhost:3000](http://localhost:3000) da ochiladi.
+Sayt: http://localhost:3000
 
-## Script'lar
+## Scripts
 
 - `npm run dev` - Development server
 - `npm run build` - Production build
 - `npm run start` - Production server
-- `npm run sync` - Dastlabki ma'lumotlarni sync qilish
-- `npm run webhook:setup <url>` - Telegram webhook sozlash
-- `npm run webhook:delete` - Webhook o'chirish
+- `npm run sync` - Sync ALL posts from Telegram (web scraping)
+- `npm run sync:quick` - Sync only recent posts (Bot API)
+- `npm run upload-media` - Upload media to Cloudinary (optional)
+- `npm run test-fetch` - Test Telegram API connection
+- `npm run check-channel` - Check channel info
 
-## API Endpoints
+## Media Storage Options
 
-- `GET /api/posts` - Barcha postlar (pagination bilan)
-- `GET /api/posts/latest` - Eng so'nggi postlar
+### Option 1: Telegram CDN (Default)
+✅ No setup required  
+✅ Free  
+⚠️ Depends on Telegram servers  
 
-## Deployment
+### Option 2: Cloudinary (Recommended for production)
+✅ Reliable and fast  
+✅ Image optimization  
+✅ 25GB/month free tier  
 
-### Netlify'ga deploy qilish
-
-1. **GitHub'ga push qiling**
-2. **Netlify'da yangi site yarating**
-3. **Environment variables'ni qo'shing**
-4. **Build settings**:
-   - Build command: `npm run build`
-   - Publish directory: `.next`
-
-### Webhook sozlash
-
-Production'da webhook URL:
-```bash
-npm run webhook:setup https://your-site.netlify.app/.netlify/functions/telegram-webhook
+**Setup Cloudinary:**
+1. Sign up at https://cloudinary.com
+2. Add to `.env.local`:
+```env
+CLOUDINARY_CLOUD_NAME=your_cloud_name
+CLOUDINARY_API_KEY=your_api_key
+CLOUDINARY_API_SECRET=your_api_secret
 ```
+3. Create upload preset "fikriyot" in dashboard
+4. Run: `npm run upload-media`
 
-## Loyiha strukturasi
+## Project Structure
 
 ```
 fikriyot-blog/
-├── app/                    # Next.js App Router
-│   ├── api/               # API routes
-│   ├── globals.css        # Global styles
+├── app/                    # Next.js app directory
 │   ├── layout.tsx         # Root layout
-│   └── page.tsx          # Home page
+│   └── page.tsx           # Home page
 ├── components/            # React components
-│   ├── PostList.tsx      # Posts list with pagination
-│   └── TelegramWidget.tsx # Telegram widget wrapper
-├── lib/                   # Utility libraries
-│   ├── firebase.ts       # Firebase client config
-│   ├── firestore-service.ts # Firestore operations
-│   ├── telegram-service.ts  # Telegram API
-│   └── post-validator.ts    # Data validation
-├── netlify/functions/     # Netlify Functions
-│   └── telegram-webhook.ts # Webhook handler
-├── scripts/              # Utility scripts
-│   ├── initial-sync.ts   # Initial data sync
-│   └── setup-webhook.ts  # Webhook setup
-├── types/                # TypeScript types
-└── data/                 # Static data (fallback)
+│   ├── PostCard.tsx      # Post card component
+│   └── PostList.tsx      # Posts list component
+├── lib/                   # Utilities
+│   ├── telegram-service.ts    # Telegram API service
+│   ├── json-service.ts        # JSON data service
+│   └── text-formatter.tsx     # Text formatting utility
+├── types/                 # TypeScript types
+│   └── post.ts           # Post types
+├── data/                  # Data files
+│   ├── posts.json        # Real posts data
+│   └── sample-posts.json # Sample data for testing
+└── scripts/              # Utility scripts
+    ├── sync-posts.ts     # Sync posts from Telegram
+    └── test-fetch-post.ts # Test Telegram API
 ```
 
-## Monitoring
+## How It Works
 
-- **Netlify**: Function logs va analytics
-- **Firebase**: Firestore usage va errors
-- **Telegram**: Bot API logs
+### 1. Telegram Bot Setup
 
-## Troubleshooting
+Bot `@fikriyot_uz` kanalida admin bo'lishi kerak. Bot quyidagi ruxsatlarga ega:
+- Read messages
+- Access channel posts
 
-### Firebase permission errors
-```bash
-npx firebase deploy --only firestore:rules
+### 2. Post Fetching
+
+`getUpdates` API metodidan foydalanamiz:
+- Oxirgi 100 ta update'ni oladi
+- `channel_post` type'dagi update'larni filter qiladi
+- Har bir post uchun: text, entities, media, views
+
+### 3. Data Transformation
+
+Telegram message → Post model:
+```typescript
+{
+  id: string;
+  channelUsername: string;
+  postId: number;
+  date: string;
+  timestamp: number;
+  text?: string;
+  entities?: MessageEntity[];  // Bold, italic, links, etc.
+  media?: MediaContent;        // Photo, video, document
+  views?: number;
+  hasMedia: boolean;
+}
 ```
 
-### Webhook issues
-```bash
-npm run webhook:delete
-npm run webhook:setup <new-url>
+### 4. Rendering
+
+- **PostCard** - Har bir post uchun chiroyli card
+- **Text Formatting** - Entities'ni HTML'ga transform qilish
+- **Media** - Next.js Image optimization bilan
+- **Metadata** - Sana, vaqt, views
+
+## Features & Solutions
+
+✅ **Barcha postlarni olish** - Telegram Web scraping orqali  
+✅ **O'chirilgan postlarni filter qilish** - Avtomatik skip  
+✅ **Pagination** - Barcha sahifalarni o'qish  
+✅ **Rate limiting** - 1 soniya delay har bir sahifa o'rtasida  
+
+### Sync Strategies
+
+1. **Full Sync** (`npm run sync`) - Telegram Web scraping
+   - ✅ Barcha postlar
+   - ✅ O'chirilganlarni skip qiladi
+   - ⚠️ Entities yo'q (faqat text)
+   
+2. **Quick Sync** (`npm run sync:quick`) - Bot API
+   - ✅ Entities bilan (formatting)
+   - ✅ To'liq media ma'lumotlari
+   - ⚠️ Faqat oxirgi ~100 ta post
+
+## Next Steps
+
+- [ ] Firestore integratsiyasi (real-time database)
+- [ ] Webhook sozlash (real-time sync)
+- [ ] Pagination (lazy loading)
+- [ ] Search funksiyasi
+- [ ] Dark/Light mode
+- [ ] RSS feed
+
+## Deployment
+
+### Netlify
+
+1. GitHub'ga push qiling
+2. Netlify'da yangi site yarating
+3. Environment variables qo'shing
+4. Deploy!
+
+Build settings:
 ```
-
-### Build errors
-```bash
-rm -rf .next node_modules
-npm install
-npm run build
+Build command: npm run build
+Publish directory: .next
 ```
-
-## Contributing
-
-1. Fork qiling
-2. Feature branch yarating (`git checkout -b feature/amazing-feature`)
-3. Commit qiling (`git commit -m 'Add amazing feature'`)
-4. Push qiling (`git push origin feature/amazing-feature`)
-5. Pull Request oching
 
 ## License
 
-MIT License - [LICENSE](LICENSE) faylini ko'ring.
+MIT
+
+## Author
+
+Fikriyot Team

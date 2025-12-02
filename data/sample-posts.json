@@ -1,0 +1,118 @@
+{
+  "posts": [
+    {
+      "id": "sample-1",
+      "channelUsername": "fikriyot",
+      "postId": 1001,
+      "date": "2024-11-30T10:00:00.000Z",
+      "timestamp": 1732960800,
+      "text": "Assalomu alaykum! Bu test post. Unda bold matn, italic matn va link bor.",
+      "entities": [
+        {
+          "type": "bold",
+          "offset": 39,
+          "length": 10
+        },
+        {
+          "type": "italic",
+          "offset": 51,
+          "length": 11
+        },
+        {
+          "type": "url",
+          "offset": 66,
+          "length": 4
+        }
+      ],
+      "hasMedia": false,
+      "views": 1250,
+      "createdAt": "2024-11-30T10:00:00.000Z"
+    },
+    {
+      "id": "sample-2",
+      "channelUsername": "fikriyot",
+      "postId": 1002,
+      "date": "2024-11-30T11:00:00.000Z",
+      "timestamp": 1732964400,
+      "text": "Bu yerda #hashtag va @fikriyot mention bor. Yana https://t.me/fikriyot linkimiz ham bor.",
+      "entities": [
+        {
+          "type": "hashtag",
+          "offset": 9,
+          "length": 8
+        },
+        {
+          "type": "mention",
+          "offset": 21,
+          "length": 9
+        },
+        {
+          "type": "url",
+          "offset": 49,
+          "length": 23
+        }
+      ],
+      "hasMedia": false,
+      "views": 2340,
+      "createdAt": "2024-11-30T11:00:00.000Z"
+    },
+    {
+      "id": "sample-3",
+      "channelUsername": "fikriyot",
+      "postId": 1003,
+      "date": "2024-11-30T12:00:00.000Z",
+      "timestamp": 1732968000,
+      "text": "Kod namunasi:\n\nconst hello = () => {\n  console.log('Salom dunyo!');\n};\n\nBu inline kod esa.",
+      "entities": [
+        {
+          "type": "pre",
+          "offset": 15,
+          "length": 52,
+          "language": "javascript"
+        },
+        {
+          "type": "code",
+          "offset": 72,
+          "length": 11
+        }
+      ],
+      "hasMedia": false,
+      "views": 890,
+      "createdAt": "2024-11-30T12:00:00.000Z"
+    },
+    {
+      "id": "sample-4",
+      "channelUsername": "fikriyot",
+      "postId": 1004,
+      "date": "2024-11-30T13:00:00.000Z",
+      "timestamp": 1732971600,
+      "text": "Uzun post namunasi. Bu yerda bir necha paragraf bor.\n\nIkkinchi paragraf. Bu yerda underline va strikethrough ham bor.\n\nUchinchi paragraf spoiler bilan.",
+      "entities": [
+        {
+          "type": "bold",
+          "offset": 0,
+          "length": 17
+        },
+        {
+          "type": "underline",
+          "offset": 82,
+          "length": 9
+        },
+        {
+          "type": "strikethrough",
+          "offset": 95,
+          "length": 13
+        },
+        {
+          "type": "spoiler",
+          "offset": 142,
+          "length": 7
+        }
+      ],
+      "hasMedia": false,
+      "views": 1567,
+      "createdAt": "2024-11-30T13:00:00.000Z"
+    }
+  ],
+  "lastSync": "2024-11-30T13:00:00.000Z"
+}

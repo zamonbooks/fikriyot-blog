@@ -4,6 +4,13 @@ import "./globals.css";
 export const metadata: Metadata = {
   title: "Fikriyot - Blog",
   description: "Fikriyot Telegram kanalining rasmiy blog sayti",
+  icons: {
+    icon: [
+      { url: '/icon.svg', type: 'image/svg+xml' },
+      { url: '/logo.svg', type: 'image/svg+xml', sizes: '300x300' }
+    ],
+    apple: '/logo.svg',
+  },
 };
 
 export default function RootLayout({

@@ -1,92 +1,55 @@
 /**
- * Telegram kanalini tekshirish va mavjud postlarni ko'rish
+ * Check channel info and available posts
  */
 
 import { Telegraf } from 'telegraf';
 import * as dotenv from 'dotenv';
 import * as path from 'path';
 
-dotenv.config({ path: path.resolve(__dirname, '../.env.local') });
+dotenv.config({ path: path.resolve(process.cwd(), '.env.local') });
 
 const BOT_TOKEN = process.env.TELEGRAM_BOT_TOKEN!;
 const CHANNEL_USERNAME = process.env.TELEGRAM_CHANNEL_USERNAME!;
 
-if (!BOT_TOKEN || !CHANNEL_USERNAME) {
-  console.error('Error: TELEGRAM_BOT_TOKEN and TELEGRAM_CHANNEL_USERNAME must be set');
-  process.exit(1);
-}
-
 async function checkChannel() {
+  console.log('Checking channel info...\n');
+  
   const bot = new Telegraf(BOT_TOKEN);
 
   try {
-    console.log('Checking Telegram channel...');
-    console.log(`Channel: @${CHANNEL_USERNAME}`);
-    console.log(`Bot Token: ${BOT_TOKEN.substring(0, 10)}...`);
-
-    // Bot ma'lumotlarini olish
-    const me = await bot.telegram.getMe();
-    console.log(`\n✓ Bot: @${me.username} (${me.first_name})`);
-
-    // Kanal ma'lumotlarini olish
     const chat = await bot.telegram.getChat(`@${CHANNEL_USERNAME}`);
-    console.log(`✓ Chat ID: ${chat.id}`);
-    console.log(`✓ Chat type: ${chat.type}`);
-    
-    if ('title' in chat) {
-      console.log(`✓ Chat title: ${chat.title}`);
-    }
-    
-    if ('description' in chat) {
-      console.log(`✓ Description: ${chat.description}`);
-    }
+    console.log('Channel info:');
+    console.log('Type:', chat.type);
+    if ('title' in chat) console.log('Title:', chat.title);
+    if ('username' in chat) console.log('Username:', chat.username);
+    console.log('');
 
-    // Kanal postlarini olishga harakat qilish
-    console.log('\nTrying to get channel posts...');
+    // Try different offset values to see how many posts we can get
+    console.log('Testing getUpdates with different limits...\n');
     
-    // getUpdates orqali postlarni olish
-    const updates = await bot.telegram.getUpdates(0, 100, 0, []);
-    console.log(`Found ${updates.length} updates`);
-    
-    if (updates.length > 0) {
-      console.log('\nRecent updates:');
-      updates.slice(-5).forEach((update, index) => {
-        console.log(`${index + 1}. Update ID: ${update.update_id}`);
-        if ('channel_post' in update && update.channel_post) {
-          const post = update.channel_post;
-          console.log(`   Post ID: ${post.message_id}`);
-          console.log(`   Date: ${new Date(post.date * 1000).toISOString()}`);
-          console.log(`   Text: ${post.text?.substring(0, 100) || 'No text'}...`);
-        }
+    for (const limit of [10, 50, 100]) {
+      const updates = await bot.telegram.getUpdates({
+        limit,
+        allowed_updates: ['channel_post'],
       });
+      
+      const channelPosts = updates.filter(u => 'channel_post' in u);
+      console.log(`Limit ${limit}: Got ${channelPosts.length} channel posts`);
+      
+      if (channelPosts.length > 0) {
+        const firstPost = channelPosts[0].channel_post as any;
+        const lastPost = channelPosts[channelPosts.length - 1].channel_post as any;
+        console.log(`  First post ID: ${firstPost.message_id}`);
+        console.log(`  Last post ID: ${lastPost.message_id}`);
+      }
     }
 
-    console.log('\n📝 Manual post checking needed:');
-    console.log('1. Go to https://t.me/' + CHANNEL_USERNAME);
-    console.log('2. Check what posts are actually there');
-    console.log('3. Copy the real post IDs and content');
-    console.log('4. We\'ll add them manually to the JSON file');
+    console.log('\nNote: getUpdates only returns unconfirmed updates.');
+    console.log('To get all posts, we need to use webhook or web scraping.');
 
   } catch (error: any) {
-    console.error('❌ Error:', error.message);
-    
-    if (error.response) {
-      console.error('Telegram API response:', error.response);
-    }
-    
-    console.log('\n🔧 Troubleshooting:');
-    console.log('1. Make sure the bot is added to the channel as admin');
-    console.log('2. Check if the channel username is correct');
-    console.log('3. Verify the bot token is valid');
+    console.error('Error:', error.message);
   }
 }
 
-checkChannel()
-  .then(() => {
-    console.log('\n✓ Channel check completed');
-    process.exit(0);
-  })
-  .catch((error) => {
-    console.error('Fatal error:', error);
-    process.exit(1);
-  });
+checkChannel();
