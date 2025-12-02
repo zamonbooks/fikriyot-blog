@@ -30,8 +30,9 @@ async function uploadToCloudinary(mediaUrl: string, postId: number, mediaType: s
   }
 
   try {
-    // Use video/upload for videos, image/upload for images
-    const resourceType = mediaType === 'video' ? 'video' : 'image';
+    // Use video/upload for videos and audio, image/upload for images
+    // Cloudinary treats audio files as 'video' resource type
+    const resourceType = (mediaType === 'video' || mediaType === 'audio' || mediaType === 'voice') ? 'video' : 'image';
     const uploadUrl = `https://api.cloudinary.com/v1_1/${CLOUDINARY_CLOUD_NAME}/${resourceType}/upload`;
     
     const response = await axios.post(uploadUrl, {
@@ -40,6 +41,9 @@ async function uploadToCloudinary(mediaUrl: string, postId: number, mediaType: s
       public_id: `fikriyot/post-${postId}`,
       folder: 'fikriyot',
       resource_type: resourceType,
+      quality: 'auto:best',
+      fetch_format: 'auto',
+      flags: 'preserve_transparency',
     });
 
     return response.data.secure_url;
@@ -84,7 +88,10 @@ async function uploadAllMedia() {
   for (const post of postsWithMedia) {
     if (!post.media?.url) continue;
 
-    console.log(`Uploading post ${post.postId} (${post.media.type})...`);
+    const mediaTypeLabel = post.media.type === 'voice' ? 'voice message' : 
+                          post.media.type === 'audio' ? 'audio' : 
+                          post.media.type;
+    console.log(`Uploading post ${post.postId} (${mediaTypeLabel})...`);
     
     const cloudinaryUrl = await uploadToCloudinary(post.media.url, post.postId, post.media.type);
     

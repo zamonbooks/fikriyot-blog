@@ -40,6 +40,7 @@ export interface MediaContent {
     type: 'photo' | 'video' | 'document' | 'animation' | 'voice' | 'audio';
     url: string;
     videoUrl?: string;      // Actual video file URL
+    cloudinaryUrl?: string; // Cloudinary URL for all media types
     thumbnailUrl?: string;
     width?: number;
     height?: number;
@@ -49,4 +50,9 @@ export interface MediaContent {
     fileName?: string;      // document uchun
     caption?: string;
     mediaGroup?: string[];  // Multiple images/videos (media group)
+    
+    // Audio-specific fields
+    title?: string;         // Audio title
+    performer?: string;     // Artist/performer name
+    waveform?: number[];    // Voice message waveform data
 }

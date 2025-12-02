@@ -25,12 +25,12 @@ const handler: Handler = async (event: HandlerEvent) => {
 
   try {
     const update: TelegramUpdate = JSON.parse(event.body || '{}');
-    
+
     console.log('📥 Received Telegram update:', update.update_id);
 
     // Check if it's a channel post update
     const isChannelUpdate = update.channel_post || update.edited_channel_post;
-    
+
     if (!isChannelUpdate) {
       console.log('⏭️  Not a channel update, skipping');
       return {
@@ -41,14 +41,18 @@ const handler: Handler = async (event: HandlerEvent) => {
 
     const post = update.channel_post || update.edited_channel_post;
     const action = update.channel_post ? 'created' : 'edited';
-    
+
     console.log(`📝 Channel post ${action}: ${post.message_id}`);
     console.log(`📢 Text: ${post.text?.substring(0, 50) || 'No text'}...`);
+
+    // NOTE: Webhook can't directly modify posts.json in the repo
+    // Instead, it triggers a rebuild which will run the scraper during build
+    // The scraper (auto-scraper.ts) will fetch and parse the new post
 
     // Trigger Netlify rebuild
     if (NETLIFY_BUILD_HOOK) {
       console.log('🔨 Triggering Netlify rebuild...');
-      
+
       const response = await fetch(NETLIFY_BUILD_HOOK, {
         method: 'POST',
         headers: {
@@ -60,7 +64,7 @@ const handler: Handler = async (event: HandlerEvent) => {
       });
 
       if (response.ok) {
-        console.log('✅ Rebuild triggered successfully');
+        console.log('✅ Rebuild triggered - new post will be scraped during build');
       } else {
         console.error('❌ Failed to trigger rebuild:', response.statusText);
       }
@@ -70,21 +74,21 @@ const handler: Handler = async (event: HandlerEvent) => {
 
     return {
       statusCode: 200,
-      body: JSON.stringify({ 
-        ok: true, 
-        message: `Channel post ${action}`,
+      body: JSON.stringify({
+        ok: true,
+        message: `Channel post ${action}, rebuild triggered`,
         post_id: post.message_id
       })
     };
 
   } catch (error: any) {
     console.error('❌ Error processing webhook:', error);
-    
+
     return {
       statusCode: 500,
-      body: JSON.stringify({ 
-        ok: false, 
-        error: error.message 
+      body: JSON.stringify({
+        ok: false,
+        error: error.message
       })
     };
   }

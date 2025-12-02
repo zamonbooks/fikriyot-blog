@@ -21,11 +21,14 @@ interface ScrapedPost {
   text: string;
   hasMedia: boolean;
   mediaUrl?: string;
-  mediaType?: 'photo' | 'video';
+  mediaType?: 'photo' | 'video' | 'voice' | 'audio';
   mediaGroup?: string[];
   views?: number;
   forwardedFrom?: string;
   forwardedFromUrl?: string;
+  audioDuration?: number;
+  audioTitle?: string;
+  audioPerformer?: string;
 }
 
 async function fetchFromWeb(beforePostId?: number): Promise<ScrapedPost[]> {
@@ -53,8 +56,8 @@ async function fetchFromWeb(beforePostId?: number): Promise<ScrapedPost[]> {
     
     const postId = parseInt(dataPost.split('/')[1]);
     
-    // Skip deleted posts (they have "deleted" class or no content)
-    if ($post.hasClass('deleted') || $post.find('.tgme_widget_message_text').length === 0) {
+    // Skip only if explicitly marked as deleted
+    if ($post.hasClass('deleted')) {
       console.log(`Skipping deleted post: ${postId}`);
       return;
     }
@@ -97,11 +100,16 @@ async function fetchFromWeb(beforePostId?: number): Promise<ScrapedPost[]> {
     // Media
     const hasPhoto = $post.find('.tgme_widget_message_photo_wrap').length > 0;
     const hasVideo = $post.find('.tgme_widget_message_video_wrap').length > 0;
-    const hasMedia = hasPhoto || hasVideo;
+    const hasVoice = $post.find('.tgme_widget_message_voice').length > 0;
+    const hasAudio = $post.find('.tgme_widget_message_audio').length > 0;
+    const hasMedia = hasPhoto || hasVideo || hasVoice || hasAudio;
     
     let mediaUrl: string | undefined;
-    let mediaType: 'photo' | 'video' | undefined;
+    let mediaType: 'photo' | 'video' | 'voice' | 'audio' | undefined;
     let mediaGroup: string[] | undefined;
+    let audioDuration: number | undefined;
+    let audioTitle: string | undefined;
+    let audioPerformer: string | undefined;
     
     if (hasPhoto) {
       // Check for media group (multiple images)
@@ -139,6 +147,47 @@ async function fetchFromWeb(beforePostId?: number): Promise<ScrapedPost[]> {
         mediaUrl = match[1];
         mediaType = 'video';
       }
+    } else if (hasVoice) {
+      // Voice message
+      const voiceElement = $post.find('.tgme_widget_message_voice');
+      const voicePlayer = voiceElement.find('.tgme_widget_message_voice_player');
+      const audioSrc = voicePlayer.find('audio').attr('src') || voiceElement.find('audio').attr('src');
+      const durationText = voiceElement.find('.tgme_widget_message_voice_duration').text().trim();
+      
+      if (audioSrc) {
+        mediaUrl = audioSrc;
+        mediaType = 'voice';
+        
+        // Parse duration (format: "0:45" or "1:23")
+        if (durationText) {
+          const parts = durationText.split(':');
+          if (parts.length === 2) {
+            audioDuration = parseInt(parts[0]) * 60 + parseInt(parts[1]);
+          }
+        }
+      }
+    } else if (hasAudio) {
+      // Audio file (music)
+      const audioElement = $post.find('.tgme_widget_message_audio');
+      const audioPlayer = audioElement.find('audio');
+      const audioSrc = audioPlayer.attr('src');
+      
+      if (audioSrc) {
+        mediaUrl = audioSrc;
+        mediaType = 'audio';
+        
+        // Extract metadata
+        audioTitle = audioElement.find('.tgme_widget_message_audio_title').text().trim() || undefined;
+        audioPerformer = audioElement.find('.tgme_widget_message_audio_performer').text().trim() || undefined;
+        
+        const durationText = audioElement.find('.tgme_widget_message_audio_duration').text().trim();
+        if (durationText) {
+          const parts = durationText.split(':');
+          if (parts.length === 2) {
+            audioDuration = parseInt(parts[0]) * 60 + parseInt(parts[1]);
+          }
+        }
+      }
     }
     
     // Views
@@ -156,6 +205,9 @@ async function fetchFromWeb(beforePostId?: number): Promise<ScrapedPost[]> {
       views,
       forwardedFrom,
       forwardedFromUrl,
+      audioDuration,
+      audioTitle,
+      audioPerformer,
     });
   });
 
@@ -221,6 +273,9 @@ async function fetchAllPosts() {
         type: post.mediaType || 'photo',
         url: post.mediaUrl,
         mediaGroup: post.mediaGroup,
+        duration: post.audioDuration,
+        title: post.audioTitle,
+        performer: post.audioPerformer,
       } : undefined,
       views: post.views,
       hasMedia: post.hasMedia,

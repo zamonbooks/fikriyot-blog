@@ -25,6 +25,10 @@ const nextConfig: NextConfig = {
         protocol: 'https',
         hostname: '**.telesco.pe',
       },
+      {
+        protocol: 'https',
+        hostname: 'res.cloudinary.com',
+      },
     ],
   },
   

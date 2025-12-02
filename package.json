@@ -4,6 +4,7 @@
   "private": true,
   "scripts": {
     "dev": "next dev",
+    "prebuild": "tsx scripts/auto-scraper.ts",
     "build": "next build",
     "start": "next start",
     "lint": "eslint",
@@ -15,7 +16,8 @@
     "setup-webhook": "tsx scripts/setup-telegram-webhook.ts",
     "generate-favicon": "node scripts/generate-favicon.js",
     "test-fetch": "tsx scripts/test-fetch-post.ts",
-    "check-channel": "tsx scripts/check-channel.ts"
+    "check-channel": "tsx scripts/check-channel.ts",
+    "scrape": "tsx scripts/auto-scraper.ts"
   },
   "dependencies": {
     "axios": "^1.13.2",
